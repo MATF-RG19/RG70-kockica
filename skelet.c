@@ -134,7 +134,7 @@ void on_display() {
 
     draw_axis(5);
     glPushMatrix();
-        draw_cube();
+        draw_cube(); 
     glPopMatrix();
 
 
