@@ -1,6 +1,7 @@
 #include <GL/glut.h>
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
 #define TIMER_INTERVAL 20
 #define TIMER_ID 0
@@ -13,6 +14,10 @@ static void on_timer(int id);
 static void draw_axis(float len);
 static void draw_cube();
 
+float z=0;
+int r=0;
+int o1z=0;
+float obstacle1_parameter=0;
 float animation_parameter = 0;
 int animation_ongoing = 0;
 
@@ -81,16 +86,45 @@ void draw_axis(float len) {
 
 void on_keyboard(unsigned char key, int x, int y) {
     switch(key) {
-        
+        case 'g':
+        case 'G':
+            animation_ongoing=1;
+            glutTimerFunc(TIMER_INTERVAL,on_timer,TIMER_ID);
+            break;
+        case 'a':
+        case 'A':
+            if(z<=0){
+                z+=2;
+            }
+            break;
+        case 'd':
+        case 'D':
+            if(z>=0)
+                z-=2;
+            break;
         case 27:
           exit(0);
           break;
     }
+    glutPostRedisplay();
 }
 
 void on_timer(int id) {
     if (id == TIMER_ID) {
-     
+        animation_parameter+=1;
+        if(obstacle1_parameter>10){
+            obstacle1_parameter=0;
+            r=rand()%100;
+            if(r<33)
+                o1z=-2;
+            else if(r>=33 && r<=66)
+                o1z=0;
+            else if(r>66)
+                o1z=2;
+            printf("%d\n",r);
+        }
+        obstacle1_parameter+=0.1;
+        
     }
 
     glutPostRedisplay();
@@ -116,6 +150,13 @@ void draw_cube(){
     glPopMatrix();
 }
 
+void draw_obstacle(){
+    glPushMatrix();
+
+    glutSolidCube(.5);
+
+    glPopMatrix();
+}
 
 void on_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -134,9 +175,14 @@ void on_display() {
 
     draw_axis(5);
     glPushMatrix();
+        glTranslatef(0,0,z);
         draw_cube(); 
     glPopMatrix();
-
+    
+    glPushMatrix();
+        glTranslatef(0,obstacle1_parameter-7,o1z);
+        draw_obstacle(); 
+    glPopMatrix();
 
     glutSwapBuffers();
 }
