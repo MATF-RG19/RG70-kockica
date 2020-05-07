@@ -16,8 +16,8 @@ static void draw_cube();
 
 float z=0;
 int r=0;
-int o1z=0;
-float obstacle1_parameter=0;
+int o1z=0,o2z=0,o3z=0,o4z=0;
+float obstacle1_parameter=0,obstacle2_parameter=-5,obstacle3_parameter=0,obstacle4_parameter=-5;
 float animation_parameter = 0;
 int animation_ongoing = 0;
 
@@ -121,10 +121,42 @@ void on_timer(int id) {
                 o1z=0;
             else if(r>66)
                 o1z=2;
-            printf("%d\n",r);
         }
-        obstacle1_parameter+=0.1;
+        if(obstacle2_parameter>10){
+            obstacle2_parameter=0;
+            r=rand()%100;
+            if(r<33)
+                o2z=2;
+            else if(r>=33 && r<=66)
+                o2z=0;
+            else if(r>66)
+                o2z=-2;
+        }
+        if(obstacle3_parameter>10){
+            obstacle3_parameter=0;
+            r=rand()%100;
+            if(r<33)
+                o3z=2;
+            else if(r>=33 && r<=66)
+                o3z=0;
+            else if(r>66)
+                o3z=-2;
+        }
+        if(obstacle4_parameter>10){
+            obstacle4_parameter=0;
+            r=rand()%100;
+            if(r<33)
+                o4z=-2;
+            else if(r>=33 && r<=66)
+                o4z=0;
+            else if(r>66)
+                o4z=2;
+        }
         
+        obstacle1_parameter+=0.1;
+        obstacle2_parameter+=0.1;
+        obstacle3_parameter+=0.1;
+        obstacle4_parameter+=0.1;
     }
 
     glutPostRedisplay();
@@ -184,6 +216,22 @@ void on_display() {
         draw_obstacle(); 
     glPopMatrix();
 
+    glPushMatrix();
+        glTranslatef(0,obstacle2_parameter-7,o2z);
+        draw_obstacle(); 
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(0,obstacle3_parameter-7,o3z);
+        draw_obstacle(); 
+    glPopMatrix();
+    
+    glPushMatrix();
+        glTranslatef(0,obstacle4_parameter-7,o4z);
+        draw_obstacle(); 
+    glPopMatrix();
+    
+    
     glutSwapBuffers();
 }
 
