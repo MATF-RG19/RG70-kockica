@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <ctime>
 
 #define TIMER_INTERVAL 20
 #define TIMER_ID 0
@@ -14,9 +15,11 @@ static void on_timer(int id);
 static void draw_axis(float len);
 static void draw_cube();
 
-float z=0;
+int z=0;
 int r=0;
 int o1z=0,o2z=0,o3z=0,o4z=0;
+int kraj=0;
+float ubrzanje=0.1;
 float obstacle1_parameter=0,obstacle2_parameter=-5,obstacle3_parameter=0,obstacle4_parameter=-5;
 float animation_parameter = 0;
 int animation_ongoing = 0;
@@ -24,6 +27,7 @@ int animation_ongoing = 0;
 
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
     /* Inicijalizuje se GLUT. */
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
@@ -88,8 +92,9 @@ void on_keyboard(unsigned char key, int x, int y) {
     switch(key) {
         case 'g':
         case 'G':
+            if(!animation_ongoing && kraj==0)
+                glutTimerFunc(TIMER_INTERVAL,on_timer,TIMER_ID);
             animation_ongoing=1;
-            glutTimerFunc(TIMER_INTERVAL,on_timer,TIMER_ID);
             break;
         case 'a':
         case 'A':
@@ -121,6 +126,7 @@ void on_timer(int id) {
                 o1z=0;
             else if(r>66)
                 o1z=2;
+            ubrzanje+=0.001;
         }
         if(obstacle2_parameter>10){
             obstacle2_parameter=0;
@@ -153,10 +159,10 @@ void on_timer(int id) {
                 o4z=2;
         }
         
-        obstacle1_parameter+=0.1;
-        obstacle2_parameter+=0.1;
-        obstacle3_parameter+=0.1;
-        obstacle4_parameter+=0.1;
+        obstacle1_parameter+=ubrzanje;
+        obstacle2_parameter+=ubrzanje;
+        obstacle3_parameter+=ubrzanje;
+        obstacle4_parameter+=ubrzanje;
     }
 
     glutPostRedisplay();
@@ -230,6 +236,23 @@ void on_display() {
         glTranslatef(0,obstacle4_parameter-7,o4z);
         draw_obstacle(); 
     glPopMatrix();
+    
+    if(obstacle1_parameter>6.1 && obstacle1_parameter<7.5 && z==o1z){
+        animation_ongoing=0;
+        kraj=1;
+    }
+    if(obstacle2_parameter>6.1 && obstacle2_parameter<7.5 && z==o2z){
+        animation_ongoing=0;
+        kraj=1;
+    }
+    if(obstacle3_parameter>6.1 && obstacle3_parameter<7.5 && z==o3z){
+        animation_ongoing=0;
+        kraj=1;
+    }
+    if(obstacle4_parameter>6.1 && obstacle4_parameter<7.5 && z==o4z){
+        animation_ongoing=0;
+        kraj=1;
+    }
     
     
     glutSwapBuffers();
