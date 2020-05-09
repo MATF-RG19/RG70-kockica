@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
+#include <string>
 
 #define TIMER_INTERVAL 20
 #define TIMER_ID 0
@@ -15,6 +16,8 @@ static void on_timer(int id);
 static void draw_axis(float len);
 static void draw_cube();
 
+char jedinice='0',desetice='0',stotine='0';
+int rez=0;
 int z=0;
 int r=0;
 int o1z=0,o2z=0,o3z=0,o4z=0;
@@ -58,7 +61,7 @@ int main(int argc, char **argv)
 //     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 //     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
-    glClearColor(.75,.75,.75,0);
+    glClearColor(.5,.5,.5,0);
  
     glutMainLoop();
 
@@ -118,6 +121,17 @@ void on_timer(int id) {
     if (id == TIMER_ID) {
         animation_parameter+=1;
         if(obstacle1_parameter>10){
+            jedinice++;
+            if(jedinice==':'){
+                jedinice='0';
+                desetice++;
+            }
+            if(desetice==':'){
+                desetice='0';
+                stotine++;
+            }
+            
+            rez++;
             obstacle1_parameter=0;
             r=rand()%100;
             if(r<33)
@@ -129,6 +143,18 @@ void on_timer(int id) {
             ubrzanje+=0.001;
         }
         if(obstacle2_parameter>10){
+            jedinice++;
+            if(jedinice==':'){
+                jedinice='0';
+                desetice++;
+            }
+            if(desetice==':'){
+                desetice='0';
+                stotine++;
+            }
+            
+            rez++;
+            
             obstacle2_parameter=0;
             r=rand()%100;
             if(r<33)
@@ -241,18 +267,28 @@ void on_display() {
         animation_ongoing=0;
         kraj=1;
     }
-    if(obstacle2_parameter>6.1 && obstacle2_parameter<7.5 && z==o2z){
+    else if(obstacle2_parameter>6.1 && obstacle2_parameter<7.5 && z==o2z){
         animation_ongoing=0;
         kraj=1;
     }
-    if(obstacle3_parameter>6.1 && obstacle3_parameter<7.5 && z==o3z){
+    else if(obstacle3_parameter>6.1 && obstacle3_parameter<7.5 && z==o3z){
         animation_ongoing=0;
         kraj=1;
     }
-    if(obstacle4_parameter>6.1 && obstacle4_parameter<7.5 && z==o4z){
+    else if(obstacle4_parameter>6.1 && obstacle4_parameter<7.5 && z==o4z){
         animation_ongoing=0;
         kraj=1;
     }
+    
+    if(kraj==1)
+        printf("%d\n",rez);
+    
+    glRasterPos3f(0,2,-2.5);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,jedinice);
+    glRasterPos3f(0,2,-2.4);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,desetice);
+    glRasterPos3f(0,2,-2.3);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,stotine);
     
     
     glutSwapBuffers();
