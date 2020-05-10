@@ -16,13 +16,14 @@ static void on_timer(int id);
 static void draw_axis(float len);
 static void draw_cube();
 
-char jedinice='0',desetice='0',stotine='0';
+float ubrzanje=0.1;
+char jedinice='0',desetice='0',stotine='0',hiljade='0';
 int rez=0;
 int z=0;
 int r=0;
 int o1z=0,o2z=0,o3z=0,o4z=0;
+int bonus1z=0,pokupio_bonus1=0;
 int kraj=0;
-float ubrzanje=0.1;
 float obstacle1_parameter=0,obstacle2_parameter=-5,obstacle3_parameter=0,obstacle4_parameter=-5;
 float animation_parameter = 0;
 int animation_ongoing = 0;
@@ -110,6 +111,20 @@ void on_keyboard(unsigned char key, int x, int y) {
             if(z>=0)
                 z-=2;
             break;
+        case 'r':
+        case 'R':{
+            jedinice='0';desetice='0';stotine='0';hiljade='0';
+            rez=0;
+            z=0;
+            r=0;
+            o1z=0;o2z=0;o3z=0;o4z=0;
+            kraj=0;
+            obstacle1_parameter=0;obstacle2_parameter=-5;obstacle3_parameter=0;obstacle4_parameter=-5;
+            bonus1z=0;
+            animation_parameter = 0;
+            animation_ongoing=0;
+            break;
+        }
         case 27:
           exit(0);
           break;
@@ -130,6 +145,10 @@ void on_timer(int id) {
                 desetice='0';
                 stotine++;
             }
+            if(stotine==':'){
+                stotine='0';
+                hiljade++;
+            }
             
             rez++;
             obstacle1_parameter=0;
@@ -140,6 +159,17 @@ void on_timer(int id) {
                 o1z=0;
             else if(r>66)
                 o1z=2;
+            
+            r=rand()%100;
+            if(r<33)
+                bonus1z=-2;
+            else if(r>=33 && r<=66)
+                bonus1z=0;
+            else if(r>66)
+                bonus1z=2;
+            
+            pokupio_bonus1=0;
+            
             ubrzanje+=0.001;
         }
         if(obstacle2_parameter>10){
@@ -216,9 +246,33 @@ void draw_cube(){
 
 void draw_obstacle(){
     glPushMatrix();
+    
+    GLfloat diffuse[] = {1,0,0,0};
 
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+    
     glutSolidCube(.5);
+    
+    GLfloat diffuse1[] = {1,1,1,0};
 
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse1);
+
+    glPopMatrix();
+}
+
+void draw_bonus(){
+    glPushMatrix();
+
+    GLfloat diffuse[] = {0,0,1,0};
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+    
+    glutSolidSphere(.25,10,10);
+
+    GLfloat diffuse1[] = {1,1,1,0};
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse1);
+    
     glPopMatrix();
 }
 
@@ -237,11 +291,18 @@ void on_display() {
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
 
-    draw_axis(5);
+//     draw_axis(5);
     glPushMatrix();
         glTranslatef(0,0,z);
         draw_cube(); 
     glPopMatrix();
+    
+    if(pokupio_bonus1==0){
+        glPushMatrix();
+            glTranslatef(0,obstacle1_parameter-7,bonus1z);
+            draw_bonus(); 
+        glPopMatrix();
+    }
     
     glPushMatrix();
         glTranslatef(0,obstacle1_parameter-7,o1z);
@@ -280,15 +341,30 @@ void on_display() {
         kraj=1;
     }
     
+    else if(obstacle1_parameter>6.1 && obstacle1_parameter<7.5 && z==bonus1z){
+        if(pokupio_bonus1==0){
+            desetice++;
+            if(desetice==':'){
+                desetice='0';
+                stotine++;
+            }
+            rez+=10;
+            pokupio_bonus1++;
+        }
+    }
+    
     if(kraj==1)
         printf("%d\n",rez);
     
-    glRasterPos3f(0,2,-2.5);
+    glRasterPos3f(0,2,-2.6);
     glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,jedinice);
-    glRasterPos3f(0,2,-2.4);
+    glRasterPos3f(0,2,-2.5);
     glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,desetice);
-    glRasterPos3f(0,2,-2.3);
+    glRasterPos3f(0,2,-2.4);
     glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,stotine);
+    glRasterPos3f(0,2,-2.3);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,hiljade);
+    
     
     
     glutSwapBuffers();
