@@ -23,6 +23,7 @@ int z=0;
 int r=0;
 int o1z=0,o2z=0,o3z=0,o4z=0;
 int bonus1z=0,pokupio_bonus1=0;
+int bonus2z=0,pokupio_bonus2=0,bonus2radi=0;
 int kraj=0;
 float obstacle1_parameter=0,obstacle2_parameter=-5,obstacle3_parameter=0,obstacle4_parameter=-5;
 float animation_parameter = 0;
@@ -113,6 +114,7 @@ void on_keyboard(unsigned char key, int x, int y) {
             break;
         case 'r':
         case 'R':{
+            ubrzanje=0.1;
             jedinice='0';desetice='0';stotine='0';hiljade='0';
             rez=0;
             z=0;
@@ -121,6 +123,7 @@ void on_keyboard(unsigned char key, int x, int y) {
             kraj=0;
             obstacle1_parameter=0;obstacle2_parameter=-5;obstacle3_parameter=0;obstacle4_parameter=-5;
             bonus1z=0;
+            bonus2z=0;
             animation_parameter = 0;
             animation_ongoing=0;
             break;
@@ -135,6 +138,8 @@ void on_keyboard(unsigned char key, int x, int y) {
 void on_timer(int id) {
     if (id == TIMER_ID) {
         animation_parameter+=1;
+        if(bonus2radi>0)
+            bonus2radi--;
         if(obstacle1_parameter>10){
             jedinice++;
             if(jedinice==':'){
@@ -193,6 +198,16 @@ void on_timer(int id) {
                 o2z=0;
             else if(r>66)
                 o2z=-2;
+            
+            r=rand()%100;
+            if(r<33)
+                bonus2z=-2;
+            else if(r>=33 && r<=66)
+                bonus2z=0;
+            else if(r>66)
+                bonus2z=2;
+            
+            pokupio_bonus2=0;
         }
         if(obstacle3_parameter>10){
             obstacle3_parameter=0;
@@ -247,9 +262,14 @@ void draw_cube(){
 void draw_obstacle(){
     glPushMatrix();
     
-    GLfloat diffuse[] = {1,0,0,0};
-
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+    if(bonus2radi==0){
+        GLfloat diffuse[] = {1,0,0,0};
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+    }
+    else{
+        GLfloat diffuse2[] = {1,1,1,0};
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse2);
+    }
     
     glutSolidCube(.5);
     
@@ -260,10 +280,26 @@ void draw_obstacle(){
     glPopMatrix();
 }
 
-void draw_bonus(){
+void draw_bonus1(){
     glPushMatrix();
 
     GLfloat diffuse[] = {0,0,1,0};
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+    
+    glutSolidSphere(.25,10,10);
+
+    GLfloat diffuse1[] = {1,1,1,0};
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse1);
+    
+    glPopMatrix();
+}
+
+void draw_bonus2(){
+    glPushMatrix();
+
+    GLfloat diffuse[] = {0,1,0,0};
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
     
@@ -300,7 +336,14 @@ void on_display() {
     if(pokupio_bonus1==0){
         glPushMatrix();
             glTranslatef(0,obstacle1_parameter-7,bonus1z);
-            draw_bonus(); 
+            draw_bonus1(); 
+        glPopMatrix();
+    }
+    
+    if(pokupio_bonus2==0){
+        glPushMatrix();
+            glTranslatef(0,obstacle2_parameter-7,bonus2z);
+            draw_bonus2(); 
         glPopMatrix();
     }
     
@@ -324,19 +367,19 @@ void on_display() {
         draw_obstacle(); 
     glPopMatrix();
     
-    if(obstacle1_parameter>6.1 && obstacle1_parameter<7.5 && z==o1z){
+    if(obstacle1_parameter>6.1 && obstacle1_parameter<7.5 && z==o1z && bonus2radi==0){
         animation_ongoing=0;
         kraj=1;
     }
-    else if(obstacle2_parameter>6.1 && obstacle2_parameter<7.5 && z==o2z){
+    else if(obstacle2_parameter>6.1 && obstacle2_parameter<7.5 && z==o2z && bonus2radi==0){
         animation_ongoing=0;
         kraj=1;
     }
-    else if(obstacle3_parameter>6.1 && obstacle3_parameter<7.5 && z==o3z){
+    else if(obstacle3_parameter>6.1 && obstacle3_parameter<7.5 && z==o3z && bonus2radi==0){
         animation_ongoing=0;
         kraj=1;
     }
-    else if(obstacle4_parameter>6.1 && obstacle4_parameter<7.5 && z==o4z){
+    else if(obstacle4_parameter>6.1 && obstacle4_parameter<7.5 && z==o4z && bonus2radi==0){
         animation_ongoing=0;
         kraj=1;
     }
@@ -348,8 +391,19 @@ void on_display() {
                 desetice='0';
                 stotine++;
             }
+            if(stotine==':'){
+                stotine='0';
+                hiljade++;
+            }
             rez+=10;
             pokupio_bonus1++;
+        }
+    }
+    
+    else if(obstacle2_parameter>6.1 && obstacle2_parameter<7.5 && z==bonus2z){
+        if(pokupio_bonus2==0){
+            bonus2radi=75;
+            pokupio_bonus2++;
         }
     }
     
