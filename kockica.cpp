@@ -3,10 +3,15 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
-#include <string>
+#include <string.h>
+#include "image.hpp"
 
 #define TIMER_INTERVAL 20
 #define TIMER_ID 0
+
+#define FILENAME "wall.bmp"
+
+static GLuint name[1];
 
 static void on_display();
 static void on_reshape(int width, int height);
@@ -63,8 +68,40 @@ int main(int argc, char **argv)
 //     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 //     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
+    Image *image;
+    
     glClearColor(.5,.5,.5,0);
+    
+    glEnable(GL_TEXTURE_2D);
+    
+    glTexEnvf(GL_TEXTURE_ENV,
+              GL_TEXTURE_ENV_MODE,
+              GL_REPLACE);
+    
+    image = image_init(0, 0);
  
+    char *fname=strdup(FILENAME);
+    
+    image_read(image, fname);
+
+    /* Generisu se identifikatori tekstura. */
+    glGenTextures(1, name);
+
+    glBindTexture(GL_TEXTURE_2D, name[0]);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 image->width, image->height, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+    
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    image_done(image);
+    
     glutMainLoop();
 
   return 0;
@@ -129,8 +166,9 @@ void on_keyboard(unsigned char key, int x, int y) {
             break;
         }
         case 27:
-          exit(0);
-          break;
+            glDeleteTextures(1, name);
+            exit(0);
+            break;
     }
     glutPostRedisplay();
 }
@@ -259,6 +297,7 @@ void draw_cube(){
     glPopMatrix();
 }
 
+//funkcija koja crta prepreku
 void draw_obstacle(){
     glPushMatrix();
     
@@ -280,6 +319,7 @@ void draw_obstacle(){
     glPopMatrix();
 }
 
+//funkcija koja crta plavu lopticu za bonus
 void draw_bonus1(){
     glPushMatrix();
 
@@ -296,6 +336,7 @@ void draw_bonus1(){
     glPopMatrix();
 }
 
+//funkcija koja crta zelenu lopticu za bonus
 void draw_bonus2(){
     glPushMatrix();
 
@@ -328,6 +369,26 @@ void on_display() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
 
 //     draw_axis(5);
+    
+    glBindTexture(GL_TEXTURE_2D, name[0]);
+    glBegin(GL_QUADS);
+        glNormal3f(0, 1, 0);
+
+        glTexCoord2f(0, 0);
+        glVertex3f(-2, -8, 8);
+
+        glTexCoord2f(20, 0);
+        glVertex3f(-2, -8, -8);
+
+        glTexCoord2f(20, 20);
+        glVertex3f(-2, 1.6, -8);
+
+        glTexCoord2f(0, 20);
+        glVertex3f(-2, 1.6, 8);
+    glEnd();
+    
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
     glPushMatrix();
         glTranslatef(0,0,z);
         draw_cube(); 
@@ -418,7 +479,6 @@ void on_display() {
     glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,stotine);
     glRasterPos3f(0,2,-2.3);
     glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,hiljade);
-    
     
     
     glutSwapBuffers();

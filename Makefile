@@ -1,10 +1,12 @@
-PROGRAM   = zadatak
+PROGRAM   = kockica
 CC        = g++
-CFLAGS    = -g -Wall
-LDFLAGS   = -lGL -lGLU -lglut -lm
+CFLAGS    = -g -Wall -I/usr/X11R6/include -I/usr/pkg/include
+LDFLAGS   = -L/usr/X11R6/lib -L/usr/pkg/lib
+LDLIBS  = -lglut -lGLU -lGL -lm
 
-$(PROGRAM): skelet.o
-	$(CC) -o $(PROGRAM) skelet.o $(LDFLAGS)
+
+$(PROGRAM): kockica.o image.o
+	$(CC) $(LDFLAGS) -o $(PROGRAM) image.o kockica.o $(LDLIBS) 
 	
 
 .PHONY: clean dist
